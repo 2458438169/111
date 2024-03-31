@@ -1,0 +1,120 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 30;
+int col[N];		 // 用于存放x轴上每个格子上箭的数量
+int rol[N];		 // 用于存放y轴上每个格子上箭的数量
+bool flag[N][N]; // 用来标记当前格子是否走过
+int n;			 // 格子数 长宽从1到n
+
+struct PII
+{
+	int first;	// 存放x轴格子的位置
+	int second; // 存放y轴格子的位置
+};
+
+vector<PII> res;
+
+bool check(int x, int y) // 判断走过路径的箭的数量是否对应
+{
+	if (x == n && y == n)
+	{
+		for (int i = 1; i <= n; i++)
+		{
+			if (col[i] != 0 || rol[i] != 0)
+			{
+				return false;
+			}
+		}
+		for (int i = 0; i < res.size(); i++)
+		{
+			int x = res[i].first;
+			// x 轴坐标
+			int y = res[i].second;
+			// y 轴坐标
+			int sum = n * (x - 1) + y - 1;
+			// 通过计算的到为题目要求的坐标系
+			cout << sum << " ";
+		}
+		cout << endl;
+		return false;
+		// 成功终止
+	}
+	return true;
+}
+
+bool pd(int x1, int y1) // 判断是否能走当前的格子
+{
+	if (flag[x1][y1] == 1) // 已经被走过了，不能再走了
+		return 0;
+	else if (x1 < 1)
+		return 0;
+	else if (x1 > n)
+		return 0;
+	else if (y1 < 1)
+		return 0;
+	else if (y1 > n)
+		return 0;
+	else if (x1 > n)
+		return 0;
+	else if (col[x1] <= 0)
+		return 0;
+	else if (rol[y1] <= 0)
+		return 0;
+	else
+		return 1;
+}
+
+int dx[4] = {0, 1, -1, 0};
+int dy[4] = {1, 0, 0, -1};
+// dx[0]=0 dy[0]=1 那么代表向下的方向
+// dx[1]=1 dy[1]=0 那么代表向右的方向
+// dx[2]=-1 dy[2]=0 那么代表向左的方向
+// dx[3]=0 dy[3]=-1 那么代表向上的方向
+
+void DFS(int x, int y)
+{
+	if (!check(x, y))
+	{
+		return;
+	}
+	else
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			int xt = dx[i] + x;
+			int yt = dy[i] + y;
+			if (!pd(xt, yt))
+			{
+				continue;
+			}
+			else
+			{
+				flag[xt][yt] = true;
+				col[xt]--;
+				rol[yt]--;
+				res.push_back({xt, yt});
+				DFS(xt, yt);
+				// 搜索回溯后，因为没有找到正确答案，所以要恢复原本状态，返回到搜索之前
+				flag[xt][yt] = false;
+				col[xt]++;
+				rol[yt]++;
+				res.pop_back();
+			}
+		}
+	}
+}
+
+int main()
+{
+	cin >> n;
+	for (int i = 1; i <= n; i++)
+		cin >> rol[i];
+	for (int i = 1; i <= n; i++)
+		cin >> col[i];
+	flag[1][1] = true;
+	col[1]--;
+	rol[1]--;
+	res.push_back({1, 1});
+	DFS(1, 1);
+}
